@@ -2,6 +2,8 @@
 
 记录一点学习、生活和思考。这里不追求宏大的结论，只保存那些在某个下午突然变清楚的东西。
 
+访问地址：[https://zerofree00.github.io/zero.github.io/](https://zerofree00.github.io/zero.github.io/)
+
 ---
 
 ## 最新文章
