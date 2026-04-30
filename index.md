@@ -8,7 +8,7 @@
 
 ## 最新文章
 
-- [在不确定里保持前进]({{ site.baseurl }}{% post_url 2026-04-30-keep-moving-in-uncertainty %})
+- [在不确定里保持前进](https://zerofree00.github.io/zero.github.io/2026/04/30/keep-moving-in-uncertainty.html)
 
 ## 关于这里
 
