@@ -1,0 +1,149 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+body {
+  background: #f6f7f9;
+}
+
+#header_wrap {
+  background: #111827;
+  border-bottom: 4px solid #2dd4bf;
+}
+
+#project_title {
+  letter-spacing: 0;
+}
+
+#project_tagline {
+  color: #cbd5e1;
+}
+
+#main_content_wrap {
+  background: #f6f7f9;
+}
+
+#main_content {
+  color: #1f2937;
+}
+
+.home-hero {
+  padding: 28px 0 18px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-hero h1 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 42px;
+  letter-spacing: 0;
+}
+
+.hero-copy {
+  max-width: 720px;
+  color: #4b5563;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.primary-link,
+.secondary-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.primary-link {
+  background: #0f766e;
+  color: #ffffff !important;
+}
+
+.secondary-link {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #374151 !important;
+}
+
+.topic-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 26px;
+}
+
+.topic-strip span {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+
+.post-card {
+  padding: 18px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+}
+
+.post-card.featured {
+  border-top: 4px solid #0f766e;
+}
+
+.post-meta {
+  margin: 0 0 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.post-card h3 {
+  margin: 0 0 10px;
+  color: #111827;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+.post-card p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .home-hero h1 {
+    font-size: 32px;
+  }
+
+  .hero-copy {
+    font-size: 16px;
+  }
+
+  .post-grid {
+    grid-template-columns: 1fr;
+  }
+}
