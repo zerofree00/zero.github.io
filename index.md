@@ -4,14 +4,38 @@ title: Zero 的博客
 ---
 
 <section class="home-hero">
-  <p class="eyebrow">PROGRAMMER NOTES</p>
-  <h1>Zero 的博客</h1>
-  <p class="hero-copy">
-    记录写代码、搭博客、排查问题和持续学习时踩过的坑。这里不追求宏大的结论，更像一份慢慢积累的工程手记。
-  </p>
-  <div class="hero-actions">
-    <a class="primary-link" href="https://zerofree00.github.io/zero.github.io/">访问博客首页</a>
-    <a class="secondary-link" href="https://github.com/zerofree00/zero.github.io">查看 GitHub 仓库</a>
+  <div class="hero-copy-block">
+    <p class="eyebrow">PROGRAMMER NOTES</p>
+    <h1>Zero 的开发手记</h1>
+    <p class="hero-copy">
+      记录写代码、搭博客、排查问题和持续学习时踩过的坑。这里像一个轻量工作台，把思路、命令、错误和修复都留下来。
+    </p>
+    <div class="hero-actions">
+      <a class="primary-link" href="https://zerofree00.github.io/zero.github.io/">访问博客首页</a>
+      <a class="secondary-link" href="https://github.com/zerofree00/zero.github.io">查看 GitHub 仓库</a>
+    </div>
+    <div class="hero-stats" aria-label="博客状态">
+      <span><strong>8</strong> articles</span>
+      <span><strong>4</strong> dev notes</span>
+      <span><strong>gh-pages</strong> branch</span>
+    </div>
+  </div>
+
+  <div class="terminal-panel" aria-label="终端预览">
+    <div class="terminal-bar">
+      <span></span>
+      <span></span>
+      <span></span>
+      <strong>zero.github.io</strong>
+    </div>
+    <pre><code>$ git status --short --branch
+## gh-pages...origin/gh-pages
+
+$ bundle exec jekyll build
+done in 0.42 seconds
+
+$ open /2026/04/30/debug-404.html
+status: 200 OK</code></pre>
   </div>
 </section>
 
@@ -24,6 +48,8 @@ title: Zero 的博客
 </section>
 
 ## 程序员文章
+
+<p class="section-intro">这些文章更偏真实工程现场：搭建、发布、链接、404、Git 工作流。</p>
 
 <div class="post-grid">
   <article class="post-card featured">
