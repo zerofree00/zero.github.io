@@ -161,30 +161,21 @@ title: "音乐搜索"
 
 <div class="search-box">
   <input type="text" id="keyword" placeholder="输入歌名或歌手名..." autofocus>
-  <select id="source">
-    <option value="gequbao">歌曲吧</option>
-    <option value="jywav">鲸音无损</option>
-  </select>
   <button id="searchBtn" onclick="doSearch()">搜索</button>
 </div>
-<p class="hint">搜索结果来自第三方网站，点击"查看"跳转到原文页面获取下载链接。</p>
-<div id="results"></div>
+<p class="hint">点击搜索后会在新标签页打开对应网站的搜索结果页，直接在那边下载。</p>
+
+<div class="source-links" id="sourceLinks" style="display:none; margin-top: 24px;">
+  <p class="results-info" id="linksTitle"></p>
+  <ul class="song-list" id="linksList"></ul>
+</div>
 
 <script>
-const PROXY = 'https://api.allorigins.win/raw?url=';
-
-const SOURCES = {
-  gequbao: {
-    name: '歌曲吧',
-    searchUrl: (kw) => `https://www.gequbao.com/s/${encodeURIComponent(kw)}`,
-    parse: parseGequbao,
-  },
-  jywav: {
-    name: '鲸音无损',
-    searchUrl: (kw) => `https://www.jywav.com/search?keyword=${encodeURIComponent(kw)}`,
-    parse: parseJywav,
-  },
-};
+const SOURCES = [
+  { name: '歌曲吧', url: (kw) => `https://www.gequbao.com/s/${encodeURIComponent(kw)}` },
+  { name: '鲸音无损', url: (kw) => `https://www.jywav.com/search?keyword=${encodeURIComponent(kw)}` },
+  { name: '泡椒音乐', url: (kw) => `https://www.pjmp3.com/search?keyword=${encodeURIComponent(kw)}` },
+];
 
 const $ = (id) => document.getElementById(id);
 
@@ -192,121 +183,31 @@ $('keyword').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doSearch();
 });
 
-async function doSearch() {
+function doSearch() {
   const keyword = $('keyword').value.trim();
   if (!keyword) return;
 
-  const sourceKey = $('source').value;
-  const source = SOURCES[sourceKey];
-  const btn = $('searchBtn');
-  const results = $('results');
+  const linksList = $('linksList');
+  const linksTitle = $('linksTitle');
+  const sourceLinks = $('sourceLinks');
 
-  btn.disabled = true;
-  btn.textContent = '搜索中...';
-  results.innerHTML = '<div class="loading"><span class="spinner"></span>正在搜索...</div>';
+  linksTitle.textContent = `"${keyword}" 的搜索链接：`;
+  linksList.innerHTML = '';
 
-  try {
-    const url = PROXY + encodeURIComponent(source.searchUrl(keyword));
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`请求失败 (${resp.status})`);
-    const html = await resp.text();
-
-    const songs = source.parse(html);
-
-    if (songs.length === 0) {
-      results.innerHTML = '<div class="empty-msg">没有找到结果，换个关键词试试</div>';
-    } else {
-      let listHtml = `<p class="results-info">找到 ${songs.length} 首歌曲（${source.name}）</p>`;
-      listHtml += '<ul class="song-list">';
-      songs.forEach((song, i) => {
-        const artist = song.artist ? `<div class="song-artist">${escHtml(song.artist)}</div>` : '';
-        listHtml += `
-          <li class="song-item">
-            <div class="song-info">
-              <span class="num">${i + 1}</span>
-              <div class="song-meta">
-                <div class="song-title">${escHtml(song.title)}</div>
-                ${artist}
-              </div>
-            </div>
-            <div class="song-link"><a href="${escAttr(song.url)}" target="_blank" rel="noopener">查看</a></div>
-          </li>`;
-      });
-      listHtml += '</ul>';
-      results.innerHTML = listHtml;
-    }
-  } catch (err) {
-    results.innerHTML = `<div class="error-msg">搜索失败：${escHtml(err.message)}<br>可能是因为网络问题或 CORS 代理不可用，请稍后再试。</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '搜索';
-  }
-}
-
-function parseGequbao(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const songs = [];
-  const seen = new Set();
-
-  doc.querySelectorAll('a[href^="/music/"]').forEach((a) => {
-    const href = a.getAttribute('href');
-    if (!/^\/music\/\d+$/.test(href)) return;
-
-    const text = a.textContent.trim();
-    if (!text || /播放|下载|Play|Download/i.test(text)) return;
-
-    const fullUrl = 'https://www.gequbao.com' + href;
-    if (seen.has(fullUrl)) return;
-    seen.add(fullUrl);
-
-    let title = text, artist = '';
-    const idx = text.indexOf('-');
-    if (idx > 0) {
-      title = text.substring(0, idx).trim();
-      artist = text.substring(idx + 1).trim();
-    }
-
-    songs.push({ title, artist, url: fullUrl });
+  SOURCES.forEach((source) => {
+    const li = document.createElement('li');
+    li.className = 'song-item';
+    li.innerHTML = `
+      <div class="song-info">
+        <div class="song-meta">
+          <div class="song-title">${source.name}</div>
+        </div>
+      </div>
+      <div class="song-link"><a href="${escAttr(source.url(keyword))}" target="_blank" rel="noopener">去搜索</a></div>`;
+    linksList.appendChild(li);
   });
 
-  return songs;
-}
-
-function parseJywav(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const songs = [];
-  const seen = new Set();
-
-  doc.querySelectorAll('a[href*="/music/info.html?id=MUSIC_"]').forEach((a) => {
-    const href = a.getAttribute('href');
-    const m = href.match(/id=(MUSIC_\d+)/);
-    if (!m) return;
-
-    const musicId = m[1];
-    if (seen.has(musicId)) return;
-    seen.add(musicId);
-
-    const text = a.textContent.trim();
-    let title = text, artist = '';
-    const match = text.match(/(.+?)《(.+?)》/);
-    if (match) {
-      artist = match[1].trim();
-      title = match[2].trim();
-    }
-
-    const fullUrl = href.startsWith('http') ? href : 'https://www.jywav.com' + href;
-    songs.push({ title, artist, url: fullUrl });
-  });
-
-  return songs;
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  sourceLinks.style.display = 'block';
 }
 
 function escAttr(s) {
