@@ -15,7 +15,7 @@ title: Zero 的博客
       <a class="secondary-link" href="https://github.com/zerofree00/zero.github.io">查看 GitHub 仓库</a>
     </div>
     <div class="hero-stats" aria-label="博客状态">
-      <span><strong>8</strong> articles</span>
+      <span><strong>9</strong> articles</span>
       <span><strong>4</strong> dev notes</span>
       <span><strong>gh-pages</strong> branch</span>
     </div>
@@ -70,10 +70,16 @@ status: 200 OK</code></pre>
     <p>提交不是仪式感，而是给自己留下可回退、可解释、可继续推进的工作现场。</p>
   </article>
 
-  <article class="post-card">
-    <p class="post-meta">Debugging · 方法</p>
-    <h3><a href="https://zerofree00.github.io/zero.github.io/2026/04/30/debug-404.html">遇到 404 时，我会怎么排查</a></h3>
-    <p>从 URL、构建产物、文件日期和配置路径开始，一步步把“打不开”变成一个具体问题。</p>
+  <article class=”post-card”>
+    <p class=”post-meta”>Debugging · 方法</p>
+    <h3><a href=”https://zerofree00.github.io/zero.github.io/2026/04/30/debug-404.html”>遇到 404 时，我会怎么排查</a></h3>
+    <p>从 URL、构建产物、文件日期和配置路径开始，一步步把”打不开”变成一个具体问题。</p>
+  </article>
+
+  <article class=”post-card”>
+    <p class=”post-meta”>工具 · Python</p>
+    <h3><a href=”https://zerofree00.github.io/zero.github.io/2026/05/14/music-search-tool.html”>歌曲宝：一个本地音乐搜索下载小工具</a></h3>
+    <p>支持三个数据源的本地音乐搜索下载工具，双击 bat 即可使用，也有在线搜索页面。</p>
   </article>
 </div>
 

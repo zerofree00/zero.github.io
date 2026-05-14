@@ -1,0 +1,315 @@
+---
+layout: default
+title: "音乐搜索"
+---
+
+<style>
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .search-box input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    font-size: 16px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #1e1e1e;
+    color: #eee;
+    outline: none;
+  }
+  .search-box input[type="text"]:focus {
+    border-color: #58a6ff;
+  }
+  .search-box select {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #1e1e1e;
+    color: #eee;
+    cursor: pointer;
+  }
+  .search-box button {
+    padding: 10px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background: #58a6ff;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .search-box button:hover {
+    background: #79b8ff;
+  }
+  .search-box button:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
+  .results-info {
+    color: #8b949e;
+    margin: 16px 0 8px;
+    font-size: 14px;
+  }
+  .song-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .song-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #2d2d2d;
+    transition: background 0.15s;
+  }
+  .song-item:hover {
+    background: #1a1a2e;
+  }
+  .song-title {
+    font-weight: 600;
+    color: #e6edf3;
+  }
+  .song-artist {
+    color: #8b949e;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  .song-link {
+    white-space: nowrap;
+    margin-left: 16px;
+  }
+  .song-link a {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #58a6ff;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .song-link a:hover {
+    background: #58a6ff;
+    color: #fff;
+    border-color: #58a6ff;
+  }
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #8b949e;
+  }
+  .loading .spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #333;
+    border-top-color: #58a6ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .error-msg {
+    color: #f85149;
+    padding: 16px;
+    background: #1e1011;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .empty-msg {
+    text-align: center;
+    padding: 40px;
+    color: #8b949e;
+  }
+  .hint {
+    color: #8b949e;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .num {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background: #2d2d2d;
+    color: #8b949e;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .song-info {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .song-meta {
+    min-width: 0;
+  }
+</style>
+
+<div class="search-box">
+  <input type="text" id="keyword" placeholder="输入歌名或歌手名..." autofocus>
+  <select id="source">
+    <option value="gequbao">歌曲吧</option>
+    <option value="jywav">鲸音无损</option>
+  </select>
+  <button id="searchBtn" onclick="doSearch()">搜索</button>
+</div>
+<p class="hint">搜索结果来自第三方网站，点击"查看"跳转到原文页面获取下载链接。</p>
+<div id="results"></div>
+
+<script>
+const PROXY = 'https://api.allorigins.win/raw?url=';
+
+const SOURCES = {
+  gequbao: {
+    name: '歌曲吧',
+    searchUrl: (kw) => `https://www.gequbao.com/s/${encodeURIComponent(kw)}`,
+    parse: parseGequbao,
+  },
+  jywav: {
+    name: '鲸音无损',
+    searchUrl: (kw) => `https://www.jywav.com/search?keyword=${encodeURIComponent(kw)}`,
+    parse: parseJywav,
+  },
+};
+
+const $ = (id) => document.getElementById(id);
+
+$('keyword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doSearch();
+});
+
+async function doSearch() {
+  const keyword = $('keyword').value.trim();
+  if (!keyword) return;
+
+  const sourceKey = $('source').value;
+  const source = SOURCES[sourceKey];
+  const btn = $('searchBtn');
+  const results = $('results');
+
+  btn.disabled = true;
+  btn.textContent = '搜索中...';
+  results.innerHTML = '<div class="loading"><span class="spinner"></span>正在搜索...</div>';
+
+  try {
+    const url = PROXY + encodeURIComponent(source.searchUrl(keyword));
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`请求失败 (${resp.status})`);
+    const html = await resp.text();
+
+    const songs = source.parse(html);
+
+    if (songs.length === 0) {
+      results.innerHTML = '<div class="empty-msg">没有找到结果，换个关键词试试</div>';
+    } else {
+      let listHtml = `<p class="results-info">找到 ${songs.length} 首歌曲（${source.name}）</p>`;
+      listHtml += '<ul class="song-list">';
+      songs.forEach((song, i) => {
+        const artist = song.artist ? `<div class="song-artist">${escHtml(song.artist)}</div>` : '';
+        listHtml += `
+          <li class="song-item">
+            <div class="song-info">
+              <span class="num">${i + 1}</span>
+              <div class="song-meta">
+                <div class="song-title">${escHtml(song.title)}</div>
+                ${artist}
+              </div>
+            </div>
+            <div class="song-link"><a href="${escAttr(song.url)}" target="_blank" rel="noopener">查看</a></div>
+          </li>`;
+      });
+      listHtml += '</ul>';
+      results.innerHTML = listHtml;
+    }
+  } catch (err) {
+    results.innerHTML = `<div class="error-msg">搜索失败：${escHtml(err.message)}<br>可能是因为网络问题或 CORS 代理不可用，请稍后再试。</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '搜索';
+  }
+}
+
+function parseGequbao(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const songs = [];
+  const seen = new Set();
+
+  doc.querySelectorAll('a[href^="/music/"]').forEach((a) => {
+    const href = a.getAttribute('href');
+    if (!/^\/music\/\d+$/.test(href)) return;
+
+    const text = a.textContent.trim();
+    if (!text || /播放|下载|Play|Download/i.test(text)) return;
+
+    const fullUrl = 'https://www.gequbao.com' + href;
+    if (seen.has(fullUrl)) return;
+    seen.add(fullUrl);
+
+    let title = text, artist = '';
+    const idx = text.indexOf('-');
+    if (idx > 0) {
+      title = text.substring(0, idx).trim();
+      artist = text.substring(idx + 1).trim();
+    }
+
+    songs.push({ title, artist, url: fullUrl });
+  });
+
+  return songs;
+}
+
+function parseJywav(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const songs = [];
+  const seen = new Set();
+
+  doc.querySelectorAll('a[href*="/music/info.html?id=MUSIC_"]').forEach((a) => {
+    const href = a.getAttribute('href');
+    const m = href.match(/id=(MUSIC_\d+)/);
+    if (!m) return;
+
+    const musicId = m[1];
+    if (seen.has(musicId)) return;
+    seen.add(musicId);
+
+    const text = a.textContent.trim();
+    let title = text, artist = '';
+    const match = text.match(/(.+?)《(.+?)》/);
+    if (match) {
+      artist = match[1].trim();
+      title = match[2].trim();
+    }
+
+    const fullUrl = href.startsWith('http') ? href : 'https://www.jywav.com' + href;
+    songs.push({ title, artist, url: fullUrl });
+  });
+
+  return songs;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function escAttr(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
